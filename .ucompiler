@@ -1,0 +1,16 @@
+{
+  "defaultRule": "compile-src",
+  "rules": [{
+    "name": "compile-src",
+    "plugins": ["babel"],
+    "babel": {
+      "presets": ["es2015", "stage-1"],
+      "plugins": ["transform-flow-strip-types"]
+    },
+    "include": [{
+      "directory": "src",
+      "extensions": ["js"]
+    }],
+    "outputPath": "lib/{relativePath:4}"
+  }]
+}
