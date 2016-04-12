@@ -2,13 +2,13 @@ type Memoize$Options = {
   async?: boolean
 }
 
-export default function memoize(callback, options: Memoize$Options = {}) {
+export default function weakMemoize(callback, options: Memoize$Options = {}) {
+  const cache: Map<Array, any> = new Map()
   function memoized(...parameters: Array<mixed>) {
-    const cacheKey = JSON.stringify(parameters)
     const parametersLength = parameters.length
 
-    if (cacheKey in memoized.cache) {
-      const value = memoized.cache[cacheKey]
+    if (cache.get(parameters)) {
+      const value = cache.get(parameters)
       if (options.async && !(value && value.constructor.name === 'Promise')) {
         return Promise.resolve(value)
       }
@@ -28,19 +28,17 @@ export default function memoize(callback, options: Memoize$Options = {}) {
       value = callback.apply(this, parameters)
     }
 
-    memoized.cache[cacheKey] = value
+    cache.set(parameters, value)
     if (options.async) {
       if (!value || value.constructor.name !== 'Promise') {
         throw new Error('Memoization Error, Async function returned non-promise value')
       }
       return value.then((realValue) => {
-        memoized.cache[cacheKey] = realValue
+        cache.set(parameters, realValue)
         return realValue
       })
     }
     return value
   }
-
-  memoized.cache = new Map()
   return memoized
 }
