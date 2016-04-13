@@ -46,7 +46,7 @@ export default function weakMemoize(callback: Function, options: memoizeOptions 
 
     // Add the value and timer to the caches
     memoized.cache.set(cacheKey, value)
-    memoized.timer.set(cacheKey, invalidate)
+    memoized.timers.set(cacheKey, invalidate)
 
     // If the async option is specified, handle a promise
     if (options.async) {
