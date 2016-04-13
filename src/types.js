@@ -1,6 +1,6 @@
 // @flow
 
-export type memoizeOptions = {
+export type MemoizeOptions = {
   async?: boolean,
   delay?: number
 }

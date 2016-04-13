@@ -1,9 +1,9 @@
 // @flow
 
 import debounce from 'lodash.debounce'
-import type { memoizeOptions } from './types'
+import type { MemoizeOptions } from './types'
 
-export default function weakMemoize(callback: Function, options: memoizeOptions = { delay: 0 }): Function {
+export default function weakMemoize(callback: Function, options: MemoizeOptions = { delay: 0 }): Function {
   function memoized(...parameters: Array<mixed>) {
     const cacheKey = JSON.stringify(parameters)
     const parametersLength = parameters.length
