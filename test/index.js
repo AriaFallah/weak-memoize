@@ -1,10 +1,11 @@
 import test from 'ava'
 import assert from 'assert'
-import memoize from '../lib'
+import memoizeD from '../lib/delay'
+import memoizeP from '../lib/promise'
 
-test('It works', async (t) => {
+test('Delay works', async (t) => {
   let i = 0
-  const memoized = memoize(() => {
+  const memoized = memoizeD(() => {
     i++
     if (i === 1) {
       return 1
@@ -26,5 +27,30 @@ test('It works', async (t) => {
     ])
   } catch (err) {
     t.fail(err)
+  }
+})
+
+test('Promise works', async (t) => {
+  let i = 0
+  const memoized = memoizeP(() => {
+    i++
+    if (i === 1) {
+      return new Promise((resolve) => setTimeout(() => resolve(1), 1000))
+    }
+    return Promise.resolve()
+  })
+  try {
+    const first = memoized()
+    memoized()
+    memoized()
+    memoized()
+    memoized()
+    memoized()
+    assert.equal(i, 1)
+    await first
+    memoized()
+    assert.equal(i, 2)
+  } catch (err) {
+    t.fail(err.stack)
   }
 })
