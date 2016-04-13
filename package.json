@@ -7,6 +7,7 @@
     "lodash.debounce": "^4.0.5"
   },
   "devDependencies": {
+    "ava": "^0.14.0",
     "babel-eslint": "^6.0.2",
     "babel-preset-aria": "^1.0.0",
     "eslint": "^2.7.0",

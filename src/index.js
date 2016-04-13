@@ -3,16 +3,18 @@
 import debounce from 'lodash.debounce'
 import type { memoizeOptions } from './types'
 
-// Weakly hold timers that invalidate the cache
-const timers: WeakMap<Array<any>, Function> = new WeakMap()
-
 export default function weakMemoize(callback: Function, options: memoizeOptions = { delay: 0 }): Function {
   function memoized(...parameters: Array<mixed>) {
+    const cacheKey = JSON.stringify(parameters)
     const parametersLength = parameters.length
 
     // Cache hit
-    if (memoized.cache.has(parameters)) {
-      const value = memoized.cache.get(parameters)
+    if (memoized.cache.has(cacheKey)) {
+      // Restart the invalidation
+      memoized.timer.get(cacheKey)()
+
+      // Get the cached value
+      const value = memoized.cache.get(cacheKey)
 
       // If the cache updated a promise in the cache to the
       // value inside the promise resolve the value as a promise
@@ -37,17 +39,16 @@ export default function weakMemoize(callback: Function, options: memoizeOptions 
       value = callback.apply(this, parameters)
     }
 
-    // Add the value to the cache
-    memoized.cache.set(parameters, value)
+    // Create the debounced function that'll invalidate the caches
+    const invalidate =
+      debounce(clearCacheKeys, options.delay)
+        .bind(null, [memoized.cache, memoized.timers], cacheKey)
 
-    // Create and call the debounced function that'll invalidate the cache
-    const invalidate = debounce(clearCacheKey, options.delay)
-    invalidate(memoized.cache, parameters)
+    // Add the value and timer to the caches
+    memoized.cache.set(cacheKey, value)
+    memoized.timer.set(cacheKey, invalidate)
 
-    // Add the invalidation function to our WeakMap
-    timers.set(parameters, invalidate)
-
-    // If the async option is specified handle a promise
+    // If the async option is specified, handle a promise
     if (options.async) {
       if (!value || value.constructor.name !== 'Promise') {
         throw new Error('Memoization Error, Async function returned non-promise value')
@@ -55,13 +56,24 @@ export default function weakMemoize(callback: Function, options: memoizeOptions 
       return value.then((realValue) => {
         // Once the promise resolves update the cache with the resolved value
         memoized.cache.set(parameters, realValue)
+
+        // Only begin invalidation once promise resolves
+        invalidate()
         return realValue
       })
     }
+
+    // Return value, and begin invalidation countdown
+    invalidate()
     return value
   }
   memoized.cache = new Map()
+  memoized.timers = new Map()
   return memoized
 }
 
-function clearCacheKey(cache, key) { cache.delete(key) }
+function clearCacheKeys(caches: Array<Map>, key: string) {
+  for (const cache of caches) {
+    cache.delete(key)
+  }
+}
