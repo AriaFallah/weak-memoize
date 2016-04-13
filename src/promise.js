@@ -9,8 +9,7 @@ function promiseMemoize(callback: Function): Function {
     // Cache hit
     if (memoized.cache.has(cacheKey)) {
       // Get the cached value
-      const value = memoized.cache.get(cacheKey)
-      return value
+      return memoized.cache.get(cacheKey)
     }
 
     // Get and add the value to the cache
