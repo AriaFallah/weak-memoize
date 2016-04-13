@@ -60,6 +60,10 @@ export default function weakMemoize(callback: Function, options: memoizeOptions 
         // Only begin invalidation once promise resolves
         invalidate()
         return realValue
+      }).catch((err) => {
+        // Delete the keys if the promise rejects
+        clearCacheKeys([memoized.cache, memoized.timers], cacheKey)
+        throw err
       })
     }
 
