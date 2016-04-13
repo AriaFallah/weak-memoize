@@ -1,2 +1,5 @@
 [ignore]
 .*/node_modules/sb-event-kit/lib/*
+
+[options]
+suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore

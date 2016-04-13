@@ -10,8 +10,8 @@ export default function weakMemoize(callback: Function, options: memoizeOptions 
 
     // Cache hit
     if (memoized.cache.has(cacheKey)) {
-      // Restart the invalidation
-      memoized.timer.get(cacheKey)()
+      // $FlowIgnore Restart the invalidation
+      memoized.timers.get(cacheKey)()
 
       // Get the cached value
       const value = memoized.cache.get(cacheKey)
