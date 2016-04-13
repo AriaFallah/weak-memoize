@@ -4,8 +4,7 @@
     "name": "compile-src",
     "plugins": ["babel"],
     "babel": {
-      "presets": ["es2015", "stage-1"],
-      "plugins": ["transform-flow-strip-types"]
+      "presets": ["aria"]
     },
     "include": [{
       "directory": "src",
