@@ -1,2 +1,2 @@
-export delay from './delay'
-export promise from './promise'
+export memoizeD from './delay'
+export memoizeP from './promise'
