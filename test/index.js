@@ -1,56 +1,41 @@
-import test from 'ava'
-import assert from 'assert'
-import memoizeD from '../lib/delay'
-import memoizeP from '../lib/promise'
+/* eslint-env jest */
 
-test('Delay works', async (t) => {
-  let i = 0
-  const memoized = memoizeD(() => {
-    i++
-    if (i === 1) {
-      return 1
-    }
-    return 2
-  }, { delay: 1000 })
-  try {
-    assert.equal(memoized(), 1)
-    assert.equal(memoized(), 1)
-    assert.equal(memoized(), 1)
-    assert.equal(memoized(), 1)
-    assert.equal(memoized(), 1)
-    assert.equal(i, 1)
-    await Promise.all([
-      new Promise((resolve) =>
-        setTimeout(() => assert.notEqual(memoized.cache.size, 0) || resolve(), 500)),
-      new Promise((resolve) =>
-        setTimeout(() => assert.equal(memoized.cache.size, 0) || resolve(), 1000))
-    ])
-  } catch (err) {
-    t.fail(err)
-  }
-})
+import memoize from '../src'
 
-test('Promise works', async (t) => {
+test('Promise works', async function() {
   let i = 0
-  const memoized = memoizeP(() => {
+  const memoized = memoize(function() {
     i++
-    if (i === 1) {
-      return new Promise((resolve) => setTimeout(() => resolve(1), 1000))
-    }
+    if (i === 1) return new Promise(resolve => setTimeout(() => resolve(1), 1000))
     return Promise.resolve()
   })
+  const first = memoized()
+  memoized()
+  memoized()
+  memoized()
+  memoized()
+  memoized()
+  expect(i).toBe(1)
+  await first
+  memoized()
+  expect(i).toBe(2)
+})
+
+test('Throws if you do not return a promise', function() {
+  const memoized = memoize(function() {
+    return 1
+  })
+  expect(memoized).toThrow()
+})
+
+test('Throws if promise rejects', async function() {
+  const memoized = memoize(function() {
+    return Promise.reject(new Error('You suck'))
+  })
+
   try {
-    const first = memoized()
-    memoized()
-    memoized()
-    memoized()
-    memoized()
-    memoized()
-    assert.equal(i, 1)
-    await first
-    memoized()
-    assert.equal(i, 2)
+    await memoized()
   } catch (err) {
-    t.fail(err.stack)
+    expect(err).toEqual(new Error('You suck'))
   }
 })
