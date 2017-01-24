@@ -1,6 +1,6 @@
 // @flow
 
-function memoize(callback: Function): Function {
+function memoize<T: Function>(callback: T): T {
   const cache = {}
   function memoized(...parameters: Array<mixed>) {
     const cacheKey = JSON.stringify(parameters)
@@ -28,7 +28,7 @@ function memoize(callback: Function): Function {
   }
 
   memoized.cache = cache
-  return memoized
+  return ((memoized: any): T)
 }
 
 export default memoize

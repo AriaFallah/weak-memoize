@@ -1,0 +1,5 @@
+// @flow
+
+declare module 'weak-memoize' {
+  declare module.exports: <T: Function>(callback: T) => T;
+}
